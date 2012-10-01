@@ -17,12 +17,12 @@ public class HerbTwo {
     public static final int RIGHT = -1, LEFT = 1;
     public static final double WHEEL_CIRCUMFERENCE = Double.NaN; // cm
     public static final double WHEEL_DIAMETER = 6.87;//cm
-    //distance between tires
-    public static final double WHEEL_BASE_SIZE = 17; //cm
+    public static final double WHEEL_BASE_SIZE = 17; //cm between tires
     public static final int SERVO_STRENGTH = 900;
     public static final int MOVE_DELAY = 500;//ms
     public static final int DETECT_DISTANCE = 60;//cm
     public static final int REVERSE_DETECT_DISTANCE = 30;//cm
+    public static final int REVERSE_DURATION = 3000;//ms time to reverse
     public static final int ARC_SIZE = 60;//wheel differential in percent
     public static final int TRAVEL_SPEED = 100; //arbitrary, > 0
     public static final int TURN_DIRECTION = RIGHT; //RIGHT or LEFT
@@ -77,7 +77,7 @@ public class HerbTwo {
             sleepFor(100);
             GYRO_CONTROLLER.forward();
 
-            sleepFor(2000);//reverse for a bit
+            sleepFor(REVERSE_DURATION);//reverse for a bit
             GYRO_CONTROLLER.backward();
             sleepFor(750);//get back to normal
             GYRO_CONTROLLER.setTravelSpeed(TRAVEL_SPEED);
