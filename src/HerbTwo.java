@@ -15,8 +15,10 @@ public class HerbTwo {
 
     public static final boolean DEBUG = true;
     public static final int RIGHT = -1, LEFT = 1;
-    public static final double WHEEL_CIRCUMFERENCE = 13.335; // cm
-    public static final double WHEEL_DIAMETER = 5.6;//cm
+    public static final double WHEEL_CIRCUMFERENCE = Double.NaN; // cm
+    public static final double WHEEL_DIAMETER = 6.87;//cm
+    //distance between tires
+    public static final double WHEEL_BASE_SIZE = 17; //cm
     public static final int SERVO_STRENGTH = 900;
     public static final int MOVE_DELAY = 500;//ms
     public static final int DETECT_DISTANCE = 60;//cm
@@ -143,7 +145,7 @@ public class HerbTwo {
                 RIGHT_ENCODER_MOTOR,
                 GYRO_SENSOR,
                 WHEEL_DIAMETER,
-                10e2);
+                WHEEL_BASE_SIZE);
 
         NAVIGATOR = new NavigatorThread();
         NAVIGATOR.disable();
