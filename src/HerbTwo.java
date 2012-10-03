@@ -227,6 +227,7 @@ public class HerbTwo {
             try {
                 Thread.sleep(1);
             } catch (InterruptedException ex) {
+                break;
             }
         }
     }
