@@ -27,14 +27,14 @@ public class HerbTwo {
     public static final int TRAVEL_SPEED = 100; //arbitrary, > 0
     public static final int TURN_DIRECTION = RIGHT; //RIGHT or LEFT
 
-    
+
     //
     //sensors
     //
     private static final GyroSensor GYRO_SENSOR = new GyroSensor(SensorPort.S2);
     private static final UltrasonicSensor US_SENSOR = new UltrasonicSensor(SensorPort.S1);
     private static final EOPD EOPD_SENSOR = new EOPD(SensorPort.S3, true);
-    
+
     //
     //motors
     //
@@ -42,7 +42,7 @@ public class HerbTwo {
     private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.A;
     private static final EncoderMotor LEFT_ENCODER_MOTOR = new NXTMotor(MotorPort.B);
     private static final EncoderMotor RIGHT_ENCODER_MOTOR = new NXTMotor(MotorPort.A);
-    
+
     //
     //static variables
     //
@@ -70,9 +70,9 @@ public class HerbTwo {
                         Sound.beep();
                         reverse();
                         Sound.twoBeeps();
-                        
+
                     } else if (prevEOPDDistance != -1
-                            && Math.abs(EOPDDistance - prevEOPDDistance) 
+                            && Math.abs(EOPDDistance - prevEOPDDistance)
                             > EOPD_REVERSE_DIFF) {
                         debug("EOPD tripped");
                         Sound.beep();
@@ -89,7 +89,7 @@ public class HerbTwo {
                 }
 
                 sleepFor(100);
-                
+
             }
         }
 
@@ -206,12 +206,12 @@ public class HerbTwo {
     }
 
     public static void debug(Object o) {
-        if (DEBUG) 
+        if (DEBUG)
             System.out.println(o);
     }
 
     public static void debug(Object o, Character ending) {
-        if (!DEBUG) 
+        if (!DEBUG)
             return;
 
         if (ending == null) {
