@@ -1,5 +1,6 @@
 
 import lejos.nxt.*;
+import lejos.nxt.addon.EOPD;
 import lejos.nxt.addon.GyroSensor;
 import lejos.robotics.EncoderMotor;
 import lejos.robotics.navigation.Move;
@@ -15,22 +16,25 @@ public class HerbTwo {
 
     public static final boolean DEBUG = true;
     public static final int RIGHT = -1, LEFT = 1;
-    public static final double WHEEL_CIRCUMFERENCE = Double.NaN; // cm
-    public static final double WHEEL_DIAMETER = 6.87;//cm
-    public static final double WHEEL_BASE_SIZE = 17; //cm between tires
+    public static final double WHEEL_CIRCUMFERENCE = 14; // cm
+    public static final double WHEEL_DIAMETER = WHEEL_CIRCUMFERENCE / Math.PI; //cm
     public static final int SERVO_STRENGTH = 900;
-    public static final int MOVE_DELAY = 500;//ms
-    public static final int DETECT_DISTANCE = 60;//cm
-    public static final int REVERSE_DETECT_DISTANCE = 30;//cm
-    public static final int REVERSE_DURATION = 3000;//ms time to reverse
-    public static final int ARC_SIZE = 60;//wheel differential in percent
+    public static final int MOVE_DELAY = 500; //ms
+    public static final int DETECT_DISTANCE = 60; //cm
+    public static final int REVERSE_DETECT_DISTANCE = 30; //cm
+    public static final int EOPD_REVERSE_DIFF = 10; //arbtrary...
+    public static final int ARC_SIZE = 50; //wheel differential in percent
     public static final int TRAVEL_SPEED = 100; //arbitrary, > 0
     public static final int TURN_DIRECTION = RIGHT; //RIGHT or LEFT
+
+    
     //
     //sensors
     //
     private static final GyroSensor GYRO_SENSOR = new GyroSensor(SensorPort.S2);
     private static final UltrasonicSensor US_SENSOR = new UltrasonicSensor(SensorPort.S1);
+    private static final EOPD EOPD_SENSOR = new EOPD(SensorPort.S3, true);
+    
     //
     //motors
     //
@@ -38,6 +42,7 @@ public class HerbTwo {
     private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.A;
     private static final EncoderMotor LEFT_ENCODER_MOTOR = new NXTMotor(MotorPort.B);
     private static final EncoderMotor RIGHT_ENCODER_MOTOR = new NXTMotor(MotorPort.A);
+    
     //
     //static variables
     //
@@ -54,33 +59,56 @@ public class HerbTwo {
 
         @Override
         public final void run() {
-            int distance;
+            int USDistance;
+            int prevEOPDDistance = -1;
+            int EOPDDistance;
             while (true) {
                 if (enabled) {
-                    distance = US_SENSOR.getDistance();
-                    if (distance < REVERSE_DETECT_DISTANCE) {
+                    USDistance = US_SENSOR.getDistance();
+                    EOPDDistance = EOPD_SENSOR.processedValue();
+                    if (USDistance < REVERSE_DETECT_DISTANCE) {
+                        Sound.beep();
                         reverse();
+                        Sound.twoBeeps();
+                        
+                    } else if (prevEOPDDistance != -1
+                            && Math.abs(EOPDDistance - prevEOPDDistance) 
+                            > EOPD_REVERSE_DIFF) {
+                        debug("EOPD tripped");
+                        Sound.beep();
+                        reverse();
+                        steerFor(2000);
+                        Sound.twoBeeps();
                     } else if (US_SENSOR.getDistance() < DETECT_DISTANCE) {
                         GYRO_CONTROLLER.steer(ARC_SIZE,
                                 TURN_DIRECTION * 90, true);
                     } else {
                         GYRO_CONTROLLER.backward();
                     }
+                    prevEOPDDistance = EOPDDistance;
                 }
 
                 sleepFor(100);
+                
             }
         }
 
         private void reverse() {
-            GYRO_CONTROLLER.setTravelSpeed(10);
+            GYRO_CONTROLLER.setTravelSpeed(TRAVEL_SPEED/2);
+            GYRO_CONTROLLER.setMoveDelay(1000);
             sleepFor(100);
             GYRO_CONTROLLER.forward();
 
-            sleepFor(REVERSE_DURATION);//reverse for a bit
+            sleepFor(4000); //reverse for a bit
             GYRO_CONTROLLER.backward();
-            sleepFor(750);//get back to normal
+            sleepFor(750); //get back to normal
             GYRO_CONTROLLER.setTravelSpeed(TRAVEL_SPEED);
+            GYRO_CONTROLLER.setMoveDelay(1000);
+        }
+        private void steerFor(long milliseconds){
+            GYRO_CONTROLLER.steer(ARC_SIZE,
+                                    TURN_DIRECTION * 90, true);
+            sleepFor(milliseconds);
         }
 
         @Override
@@ -133,6 +161,7 @@ public class HerbTwo {
         while (GYRO_CONTROLLER.isAlive()) {
             sleepFor(250);
         }
+        NAVIGATOR.disable();
 
     }
 
@@ -145,7 +174,7 @@ public class HerbTwo {
                 RIGHT_ENCODER_MOTOR,
                 GYRO_SENSOR,
                 WHEEL_DIAMETER,
-                WHEEL_BASE_SIZE);
+                10e2);
 
         NAVIGATOR = new NavigatorThread();
         NAVIGATOR.disable();
@@ -155,10 +184,11 @@ public class HerbTwo {
     }
 
     public synchronized static void run() throws InterruptedException {
-        sleepFor(5000);//let it balance
+        sleepFor(5000); //let it balance
+        NAVIGATOR.enable();
         GYRO_CONTROLLER.setTravelSpeed(TRAVEL_SPEED);
         GYRO_CONTROLLER.setMoveDelay(MOVE_DELAY);
-        GYRO_CONTROLLER.backward();//actually forward
+        GYRO_CONTROLLER.backward(); //actually forward
 
     }
 
@@ -176,33 +206,28 @@ public class HerbTwo {
     }
 
     public static void debug(Object o) {
-        if (!DEBUG) {
-            return;
-        }
-
-        System.out.println(o);
-
+        if (DEBUG) 
+            System.out.println(o);
     }
 
     public static void debug(Object o, Character ending) {
-        if (!DEBUG) {
+        if (!DEBUG) 
             return;
-        }
 
         if (ending == null) {
             System.out.print(o.toString());
         } else {
             System.out.print(o.toString() + ending);
         }
-
     }
 
     public static void sleepFor(long milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException ex) {
-            System.out.println("Exception thrown in sleepFor");
-            System.exit(1);
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < milliseconds) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException ex) {
+            }
         }
     }
     //</editor-fold>
