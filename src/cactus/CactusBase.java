@@ -62,6 +62,10 @@ public abstract class CactusBase {
      */
     static volatile DisplayOutputStream stdout = display;
 
+    /** A private constructor to ensure all programs are static. */
+    private CactusBase() 
+    { /* Do Nothing */ }
+    
     /**
      * Gets the distance to the nearest object as determined by leftIR, or 
      * {@code SENSOR_FAILURE} if no valid reading can be made.
