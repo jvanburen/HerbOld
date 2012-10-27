@@ -24,6 +24,8 @@ public abstract class CactusBase {
     public static final int LEFT_IR_PORT = 1;
     /** The port number of {@code rightIR}. */
     public static final int RIGHT_IR_PORT = 2;
+    /** The value to return when a sensor reading fails */
+    public static final float SENSOR_FAILURE = Float.POSITIVE_INFINITY;
 
     /** The Infrared proximity sensor that tracks Cactus' left wheel. */
     public static final AnalogInput leftWheelInput
@@ -60,6 +62,31 @@ public abstract class CactusBase {
      */
     static volatile DisplayOutputStream stdout = display;
 
+    /**
+     * Gets the distance to the nearest object as determined by leftIR, or 
+     * {@code SENSOR_FAILURE} if no valid reading can be made.
+     * @return The distance (in cm) to the nearest object on the left or 
+     * {@code SENSOR_FAILURE} if no valid reading can be made.
+     */
+    public static float leftCM() {
+        leftIR.ping();
+        float ret = leftIR.getDistanceCm();
+        // SENSOR_FAILURE if failed reading
+        return ret == -1 ? SENSOR_FAILURE : ret;
+    }
+    
+    /**
+     * Gets the distance to the nearest object as determined by rightIR, or 
+     * {@code SENSOR_FAILURE} if no valid reading can be made.
+     * @return The distance (in cm) to the nearest object on the right or 
+     * {@code SENSOR_FAILURE} if no valid reading can be made.
+     */
+    public static float rightCM() {
+        rightIR.ping();
+        float ret = rightIR.getDistanceCm();
+        // SENSOR_FAILURE if failed reading
+        return ret == -1 ? SENSOR_FAILURE : ret;
+    }
 
     /**
      * Plays a sequence of notes.
@@ -68,7 +95,8 @@ public abstract class CactusBase {
      */
     public static void play(int[] notes, int[] dur) {
         if (notes.length != dur.length)
-            throw new IllegalArgumentException("Arrays must be of the same size");
+            throw new IllegalArgumentException(
+                    "Arrays must be of the same size");
         for (int cactus = 0; cactus < notes.length; ++cactus)
             buzzer.play(notes[cactus], dur[cactus]);
     }
@@ -267,7 +295,7 @@ public abstract class CactusBase {
             if (directionListener != null) {
                 boolean currentDirection = currentPosition >= MIDPOINT_VALUE;
                 boolean newDirection = value >= MIDPOINT_VALUE;
-
+ 
                 if (currentDirection != newDirection)
                     directionListener.updateDirection(true);
                 else if (value == MIDPOINT_VALUE)
