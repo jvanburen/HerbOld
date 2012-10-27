@@ -170,7 +170,7 @@ public abstract class CactusBase {
     }
 
     /** Prints a welcome message to {@code stdout}. */
-    public void printWelcome() {
+    public static void printWelcome() {
         // Greet the user
         print("  Hello World,");
         print("  I am Cactus!");
