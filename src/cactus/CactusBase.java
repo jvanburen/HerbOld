@@ -105,6 +105,7 @@ public abstract class CactusBase {
      * Tells the main thread to sleep for a certain duration.
      * Accurate to within a couple milliseconds
      * Will not stop on {@code InterruptedException}.
+     * @param milliseconds The number of milliseconds to sleep for.
      */
     public static void sleepFor(long milliseconds) {
         // The time at which to return from this method
