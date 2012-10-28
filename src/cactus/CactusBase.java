@@ -228,8 +228,8 @@ public abstract class CactusBase {
          * Create a Motor object representing a servo on the specified side of
          * Cactus.
          * @param servoNumber Which servomotor to use.
-         * @param side The side on which the servo is mounted
-         * ({@see LEFT} or {@see RIGHT}).
+         * @param side The side on which the servo is mounted 
+         * (see {@code LEFT} and {@code RIGHT}).
          */
         public Motor(int servoNumber, boolean side) {
             this.s = IntelliBrain.getServo(servoNumber);
@@ -258,7 +258,7 @@ public abstract class CactusBase {
          * Moves the servo forward at the specified speed.
          * @param percent The speed to spin the motor at (0-100)%.
          */
-        public void forward(int percent) {
+        public void forward(byte percent) {
             if (percent > 100)
                 throw new IllegalArgumentException(
                         "percent must be <= 100\n(recieved: " + percent + ")");
@@ -278,7 +278,7 @@ public abstract class CactusBase {
          * Moves the servo backward at the specified speed.
          * @param percent The speed to spin the motor at (0-100)%.
          */
-        public synchronized void backward(int percent) {
+        public void backward(byte percent) {
             if (percent > 100)
                 throw new IllegalArgumentException(
                         "percent must be <= 100\n(recieved: " + percent + ")");
