@@ -63,8 +63,10 @@ public abstract class CactusBase {
     static volatile DisplayOutputStream stdout = display;
 
     /** A private constructor to ensure all programs are static. */
-    private CactusBase() 
-    { /* Do Nothing */ }
+    CactusBase() {
+        throw new InstantiationError(
+                "Instantiation of a base program should be disallowed");
+    }
     
     /**
      * Gets the distance to the nearest object as determined by leftIR, or 
